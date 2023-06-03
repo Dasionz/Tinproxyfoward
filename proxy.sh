@@ -18,8 +18,14 @@ forward_proxy() {
   local proxy="$1"
   local local_server_port="6789"
 
-  socat TCP-LISTEN:$local_server_port,fork,su=nobody TCP:$proxy &
-  echo "Proxy forwarding enabled. Proxy: $proxy -> Local server: localhost:$local_server_port"
+  # Configure proxychains with the proxy and authentication details
+  local proxychains_conf="/tmp/proxychains.conf"
+  echo "http $proxy" > "$proxychains_conf"
+
+  # Start your local server using proxychains
+  proxychains -f "$proxychains_conf" YOUR_LOCAL_SERVER_COMMAND
+
+  echo "Proxy forwarding enabled. Proxy: $proxy -> Local server"
 }
 
 # Main script logic
