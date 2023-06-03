@@ -1,8 +1,9 @@
 #!/bin/bash
 
+read -p "Enter your API Key: " api_key
+
 # Function to get a new proxy from tinproxy API
 get_new_proxy() {
-  local api_key="YOUR_API_KEY"
   local authen_ips="YOUR_AUTHEN_IPS"
   local location="YOUR_LOCATION"
 
