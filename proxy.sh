@@ -13,28 +13,15 @@ get_new_proxy() {
   echo "$http_ipv4:$username:$password"
 }
 
-# Function to update the proxychains config file with the new proxy
-update_proxychains_config() {
-  local proxy="$1"
-  local proxychains_config="/etc/proxychains.conf"
-
-  # Backup original config
-  cp $proxychains_config $proxychains_config.backup
-
-  # Extract the proxy address and the username:password
-  local proxy_address=$(echo $proxy | cut -d ':' -f 1)
-  local proxy_auth=$(echo $proxy | cut -d ':' -f 2-3)
-
-  # Update the config file with the new proxy
-  echo "http $proxy_address $proxy_auth" > $proxychains_config
-}
-
 # Main script logic
 while true; do
   proxy=$(get_new_proxy)
-  update_proxychains_config "$proxy"
   
-  # Start your local server using proxychains
-  proxychains python3 -m http.server 6789
+  # Update Tinyproxy configuration
+  sed -i "/upstream http/c\upstream http \"http://$proxy\"" /etc/tinyproxy/tinyproxy.conf
+  
+  # Restart Tinyproxy
+  sudo service tinyproxy restart
+  
   sleep 200
 done
