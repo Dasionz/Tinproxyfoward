@@ -13,17 +13,28 @@ get_new_proxy() {
   echo "$http_ipv4:$username:$password"
 }
 
-# Function to forward the proxy to your local server using mitmproxy
-forward_proxy() {
+# Function to update the proxychains config file with the new proxy
+update_proxychains_config() {
   local proxy="$1"
-  local local_server_port="6789"
+  local proxychains_config="/etc/proxychains.conf"
 
-  mitmproxy --mode reverse:http://localhost:$local_server_port --listen-host 0.0.0.0 --listen-port $local_server_port --set http_proxy=http://$proxy --set https_proxy=http://$proxy --set block_global=false
+  # Backup original config
+  cp $proxychains_config $proxychains_config.backup
+
+  # Extract the proxy address and the username:password
+  local proxy_address=$(echo $proxy | cut -d ':' -f 1)
+  local proxy_auth=$(echo $proxy | cut -d ':' -f 2-3)
+
+  # Update the config file with the new proxy
+  echo "http $proxy_address $proxy_auth" > $proxychains_config
 }
 
 # Main script logic
 while true; do
   proxy=$(get_new_proxy)
-  forward_proxy "$proxy"
+  update_proxychains_config "$proxy"
+  
+  # Start your local server using proxychains
+  proxychains python3 -m http.server 6789
   sleep 200
 done
