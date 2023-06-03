@@ -4,10 +4,7 @@ read -p "Enter your API Key: " api_key
 
 # Function to get a new proxy from tinproxy API
 get_new_proxy() {
-  local authen_ips="YOUR_AUTHEN_IPS"
-  local location="YOUR_LOCATION"
-
-  local response=$(curl -s "https://api.tinproxy.com/proxy/get-new-proxy?api_key=$api_key&authen_ips=$authen_ips&location=$location")
+  local response=$(curl -s "https://api.tinproxy.com/proxy/get-new-proxy?api_key=$api_key")
   local code=$(echo "$response" | jq -r '.code')
   local message=$(echo "$response" | jq -r '.message')
 
