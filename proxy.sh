@@ -24,5 +24,5 @@ while true; do
     systemctl restart squid
 
     # Wait 200 seconds before getting a new proxy
-    sleep 200
+    sleep 300
 done
