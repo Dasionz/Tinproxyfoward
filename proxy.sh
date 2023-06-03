@@ -13,19 +13,12 @@ get_new_proxy() {
   echo "$http_ipv4:$username:$password"
 }
 
-# Function to forward the proxy to your local server
+# Function to forward the proxy to your local server using mitmproxy
 forward_proxy() {
   local proxy="$1"
   local local_server_port="6789"
 
-  # Configure proxychains with the proxy and authentication details
-  local proxychains_conf="/tmp/proxychains.conf"
-  echo "http $proxy" > "$proxychains_conf"
-
-  # Start your local server using proxychains
-  proxychains -f "$proxychains_conf" YOUR_LOCAL_SERVER_COMMAND
-
-  echo "Proxy forwarding enabled. Proxy: $proxy -> Local server"
+  mitmproxy --mode reverse:http://localhost:$local_server_port --listen-host 0.0.0.0 --listen-port $local_server_port --set http_proxy=http://$proxy --set https_proxy=http://$proxy
 }
 
 # Main script logic
