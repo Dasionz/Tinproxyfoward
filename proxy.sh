@@ -1,26 +1,29 @@
 #!/bin/bash
 
+# API configuration
 API_KEY=""
-LOCAL_PORT=6789
-REFRESH_INTERVAL=100
 
-# Get user input for API key
-read -p "Enter your Tinproxy API key: " API_KEY
+# Local server configuration
+LOCAL_SERVER_PORT="6789"
 
+# Get API key from user input
+echo "Enter your API key:"
+read -r API_KEY
+
+# Proxy forwarding
 while true; do
-    # Get new proxy
-    response=$(curl -s "https://api.tinproxy.com/proxy/get-new-proxy?api_key=$API_KEY")
-    proxy_address=$(echo "$response" | jq -r '.data.http_ipv4')
-    proxy_port=$(echo "$response" | jq -r '.data.http_ipv4' | cut -d ':' -f 2)
-    username=$(echo "$response" | jq -r '.data.authentication.username')
-    password=$(echo "$response" | jq -r '.data.authentication.password')
+   # Get new proxy
+   response=$(curl -s "https://api.tinproxy.com/proxy/get-new-proxy?api_key=$API_KEY")
+   proxy_http=$(echo "$response" | jq -r '.data.http_ipv4')
+   proxy_username=$(echo "$response" | jq -r '.data.authentication.username')
+   proxy_password=$(echo "$response" | jq -r '.data.authentication.password')
 
-    # Forward the proxy to the local server
-    ssh -L $LOCAL_PORT:$proxy_address:$proxy_port -N -f -L $proxy_address:$proxy_port:$proxy_address:$proxy_port $username@$proxy_address -p $proxy_port -o StrictHostKeyChecking=no
+   # Forward proxy to local server
+   socat TCP-LISTEN:$LOCAL_SERVER_PORT,fork PROXY:$proxy_http,proxyport=$LOCAL_SERVER_PORT,proxyauth=$proxy_username:$proxy_password &
 
-    # Wait for the specified interval
-    sleep $REFRESH_INTERVAL
+   # Wait for 200 seconds
+   sleep 200
 
-    # Terminate the SSH tunnel
-    kill $(pgrep -f "ssh -L")
+   # Terminate the socat process
+   pkill socat
 done
