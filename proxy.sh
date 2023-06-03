@@ -18,7 +18,7 @@ forward_proxy() {
   local proxy="$1"
   local local_server_port="6789"
 
-  mitmproxy --mode reverse:http://localhost:$local_server_port --listen-host 0.0.0.0 --listen-port $local_server_port --set http_proxy=http://$proxy --set https_proxy=http://$proxy
+  mitmproxy --mode reverse:http://localhost:$local_server_port --listen-host 0.0.0.0 --listen-port $local_server_port --set http_proxy=http://$proxy --set https_proxy=http://$proxy --set block_global=false
 }
 
 # Main script logic
